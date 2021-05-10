@@ -4,6 +4,8 @@
 #include <sourcemod>
 #include <sdktools>
 
+#define WATER_LVL 1
+
 ConVar g_cvBunnyhopEnabled;
 
 public Plugin my_info =
@@ -23,11 +25,12 @@ public void OnPluginStart()
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
-    if (g_cvBunnyhopEnabled.BoolValue && IsClientInGame(client) && IsPlayerAlive(client))
+    if ((buttons & IN_JUMP) && g_cvBunnyhopEnabled.BoolValue && IsClientInGame(client) && IsPlayerAlive(client))
     {
         int flags = GetEntityFlags(client);
+        int water = GetEntProp(client, Prop_Data, "m_nWaterLevel");
         
-        if ((buttons & IN_JUMP) && !(flags & FL_ONGROUND) && !(flags & FL_INWATER))
+        if (!(flags & FL_ONGROUND) && !(GetEntityMoveType(client) & MOVETYPE_LADDER) && water < WATER_LVL)
         {
             buttons &= ~IN_JUMP;
         }
