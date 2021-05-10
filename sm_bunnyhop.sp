@@ -4,8 +4,6 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define ADMFLAG_BUNNYHOP ADMFLAG_ROOT
-
 ConVar g_cvBunnyhopEnabled;
 
 public Plugin my_info =
