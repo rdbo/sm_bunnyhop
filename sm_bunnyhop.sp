@@ -27,7 +27,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
     {
         int flags = GetEntityFlags(client);
         
-        if ((buttons & IN_JUMP) && !(flags & FL_ONGROUND))
+        if ((buttons & IN_JUMP) && !(flags & FL_ONGROUND) && !(flags & FL_INWATER))
         {
             buttons &= ~IN_JUMP;
         }
