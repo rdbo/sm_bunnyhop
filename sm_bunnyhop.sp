@@ -32,9 +32,6 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
         if ((buttons & IN_JUMP) && !(flags & FL_ONGROUND))
         {
             buttons &= ~IN_JUMP;
-            return Plugin_Changed;
         }
     }
-    
-    return Plugin_Handled;
 }
