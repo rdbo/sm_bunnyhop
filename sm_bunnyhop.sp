@@ -30,7 +30,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
         int flags = GetEntityFlags(client);
         int water = GetEntProp(client, Prop_Data, "m_nWaterLevel");
         
-        if (!(flags & FL_ONGROUND) && !(GetEntityMoveType(client) & MOVETYPE_LADDER) && water < WATER_LVL)
+        if (!(flags & FL_ONGROUND) && !(GetEntityMoveType(client) & MOVETYPE_LADDER) && water <= WATER_LVL)
         {
             buttons &= ~IN_JUMP;
         }
