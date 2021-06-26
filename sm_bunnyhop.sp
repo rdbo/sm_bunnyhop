@@ -28,20 +28,24 @@ public void OnPluginStart()
 
 public Action Event_PlayerJump(Handle event, const char[] name, bool dontBroadcast)
 {
-    if (!g_cvMaxSpeed.FloatValue)
+    if (g_cvMaxSpeed.FloatValue == 0.0)
         return Plugin_Continue;
     
     int client = GetClientOfUserId(GetEventInt(event, "userid"));
     float velocity[3];
     GetEntPropVector(client, Prop_Data, "m_vecVelocity", velocity);
+    float speed = SquareRoot(Pow(velocity[0], 2.0) + Pow(velocity[1], 2.0));
     
-    if (velocity[0] > g_cvMaxSpeed.FloatValue)
-        velocity[0] = g_cvMaxSpeed.FloatValue;
-        
-    if (velocity[1] > g_cvMaxSpeed.FloatValue)
-        velocity[1] = g_cvMaxSpeed.FloatValue;
-        
-    TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
+    if (speed > g_cvMaxSpeed.FloatValue)
+    {
+        float val = speed / g_cvMaxSpeed.FloatValue;
+        if (val != 0.0)
+        {
+            velocity[0] /= val;
+            velocity[1] /= val;
+            TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
+        }
+    }
     
     return Plugin_Continue;
 }
