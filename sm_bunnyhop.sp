@@ -23,43 +23,38 @@ public void OnPluginStart()
     PrintToServer("[SM] Admin Auto Bunnyhop plugin has been loaded");
     g_cvBunnyhopEnabled = CreateConVar("sm_bunnyhop_enabled", "1", "Enables the SM Bunnyhop plugin");
     g_cvMaxSpeed = CreateConVar("sm_bunnyhop_maxspeed", "0", "Set Max Speed (0 = Unlimited)");
-    HookEvent("player_jump", Event_PlayerJump);
-}
-
-public Action Event_PlayerJump(Handle event, const char[] name, bool dontBroadcast)
-{
-    if (g_cvMaxSpeed.FloatValue == 0.0)
-        return Plugin_Continue;
-    
-    int client = GetClientOfUserId(GetEventInt(event, "userid"));
-    float velocity[3];
-    GetEntPropVector(client, Prop_Data, "m_vecVelocity", velocity);
-    float speed = SquareRoot(Pow(velocity[0], 2.0) + Pow(velocity[1], 2.0));
-    
-    if (speed > g_cvMaxSpeed.FloatValue)
-    {
-        float val = speed / g_cvMaxSpeed.FloatValue;
-        if (val != 0.0)
-        {
-            velocity[0] /= val;
-            velocity[1] /= val;
-            TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
-        }
-    }
-    
-    return Plugin_Continue;
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
-    if ((buttons & IN_JUMP) && g_cvBunnyhopEnabled.BoolValue && IsClientInGame(client) && IsPlayerAlive(client))
+    if (g_cvBunnyhopEnabled.BoolValue && IsClientInGame(client) && IsPlayerAlive(client))
     {
         int flags = GetEntityFlags(client);
-        int water = GetEntProp(client, Prop_Data, "m_nWaterLevel");
         
-        if (!(flags & FL_ONGROUND) && !(GetEntityMoveType(client) & MOVETYPE_LADDER) && water <= WATER_LVL)
+        if (!(flags & FL_ONGROUND))
         {
-            buttons &= ~IN_JUMP;
+            int water = GetEntProp(client, Prop_Data, "m_nWaterLevel");
+            
+            if ((buttons & IN_JUMP) && !(GetEntityMoveType(client) & MOVETYPE_LADDER) && water <= WATER_LVL)
+                buttons &= ~IN_JUMP;
+        }
+        
+        else if (g_cvMaxSpeed.FloatValue != 0.0)
+        {
+            float velocity[3];
+            GetEntPropVector(client, Prop_Data, "m_vecVelocity", velocity);
+            float old_z = velocity[2];
+            velocity[2] = 0.0;
+            
+            float speed = GetVectorLength(velocity);
+            
+            if (speed > g_cvMaxSpeed.FloatValue)
+            {
+                NormalizeVector(velocity, velocity);
+                ScaleVector(velocity, g_cvMaxSpeed.FloatValue);
+                velocity[2] = old_z;
+                TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
+            }
         }
     }
 }
