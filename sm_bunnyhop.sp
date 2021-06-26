@@ -6,7 +6,8 @@
 
 #define WATER_LVL 1
 
-ConVar g_cvBunnyhopEnabled;
+ConVar g_cvEnabled;
+ConVar g_cvAutoBhop;
 ConVar g_cvMaxSpeed;
 
 public Plugin my_info =
@@ -21,13 +22,14 @@ public Plugin my_info =
 public void OnPluginStart()
 {
     PrintToServer("[SM] Admin Auto Bunnyhop plugin has been loaded");
-    g_cvBunnyhopEnabled = CreateConVar("sm_bunnyhop_enabled", "1", "Enables the SM Bunnyhop plugin");
+    g_cvEnabled = CreateConVar("sm_bunnyhop_enabled", "1", "Enable the SM Bunnyhop plugin");
+    g_cvAutoBhop = CreateConVar("sm_bunnyhop_auto", "1", "Enable Auto Bhop");
     g_cvMaxSpeed = CreateConVar("sm_bunnyhop_maxspeed", "0", "Set Max Speed (0 = Unlimited)");
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
-    if (g_cvBunnyhopEnabled.BoolValue && IsClientInGame(client) && IsPlayerAlive(client))
+    if (g_cvEnabled.BoolValue && IsClientInGame(client) && IsPlayerAlive(client))
     {
         int flags = GetEntityFlags(client);
         
@@ -35,7 +37,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
         {
             int water = GetEntProp(client, Prop_Data, "m_nWaterLevel");
             
-            if ((buttons & IN_JUMP) && !(GetEntityMoveType(client) & MOVETYPE_LADDER) && water <= WATER_LVL)
+            if (g_cvAutoBhop.BoolValue && (buttons & IN_JUMP) && !(GetEntityMoveType(client) & MOVETYPE_LADDER) && water <= WATER_LVL)
                 buttons &= ~IN_JUMP;
         }
         
