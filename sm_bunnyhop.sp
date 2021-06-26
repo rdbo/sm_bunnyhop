@@ -7,6 +7,7 @@
 #define WATER_LVL 1
 
 ConVar g_cvBunnyhopEnabled;
+ConVar g_cvMaxSpeed;
 
 public Plugin my_info =
 {
@@ -21,6 +22,28 @@ public void OnPluginStart()
 {
     PrintToServer("[SM] Admin Auto Bunnyhop plugin has been loaded");
     g_cvBunnyhopEnabled = CreateConVar("sm_bunnyhop_enabled", "1", "Enables the SM Bunnyhop plugin");
+    g_cvMaxSpeed = CreateConVar("sm_bunnyhop_maxspeed", "0", "Set Max Speed (0 = Unlimited)");
+    HookEvent("player_jump", Event_PlayerJump);
+}
+
+public Action Event_PlayerJump(Handle event, const char[] name, bool dontBroadcast)
+{
+    if (!g_cvMaxSpeed.FloatValue)
+        return Plugin_Continue;
+    
+    int client = GetClientOfUserId(GetEventInt(event, "userid"));
+    float velocity[3];
+    GetEntPropVector(client, Prop_Data, "m_vecVelocity", velocity);
+    
+    if (velocity[0] > g_cvMaxSpeed.FloatValue)
+        velocity[0] = g_cvMaxSpeed.FloatValue;
+        
+    if (velocity[1] > g_cvMaxSpeed.FloatValue)
+        velocity[1] = g_cvMaxSpeed.FloatValue;
+        
+    TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
+    
+    return Plugin_Continue;
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
